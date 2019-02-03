@@ -5,11 +5,11 @@
         v-model.number="roubles"
         class="pretty-input right-align"
         pattern="[0-9]*"
-        placeholder="123"
+        placeholder="0"
         type="tel"
         size="5"
-        maxlength="6">
-      <b style="font-size: 36px;">.</b>
+        maxlength="5">
+      <b style="font-size: 30px;">.</b>
       <input
         v-model.number="pennies"
         class="pretty-input right-align"
@@ -18,6 +18,7 @@
         type="tel"
         size="2"
         maxlength="2">
+      <span style="font-size: 30px;">₽</span>
     </div>
     <div class="input-block">
       <input
@@ -59,13 +60,17 @@ export default {
   padding: 20px;
 }
 .input-block {
-  margin-bottom: 20px;
+  margin: 20px 0;
 }
 .pretty-input {
   border: 0;
-  font-size: 36px;
+  font-size: 30px;
 }
 .right-align {
   text-align:right;
+}
+::placeholder {
+  color: #ccc;
+  opacity: 1;
 }
 </style>
