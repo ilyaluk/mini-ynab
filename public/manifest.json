@@ -1,6 +1,6 @@
 {
-  "name": "mini-ynab",
-  "short_name": "mini-ynab",
+  "name": "MiniYNAB",
+  "short_name": "MiniYNAB",
   "icons": [
     {
       "src": "./img/icons/android-chrome-192x192.png",
