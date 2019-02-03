@@ -19,12 +19,10 @@ export default {
 body {
   margin: 0;
   padding: 20px 10px;
-  padding-bottom: 0;
   width: 100%;
   min-height: 100vh;
-  background: #fc00aa;
-  background: -webkit-linear-gradient(to right, #fc00aa, #00dbde);
   background: linear-gradient(315deg, #fc00aa, #00dbde);
+  background-color: #05d6dc;
   cursor: default;
   box-sizing: border-box;
 }

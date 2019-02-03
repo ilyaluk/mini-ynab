@@ -1,24 +1,35 @@
 <template>
   <div>
-    <modals-container/>
-    <v-dialog :click-to-close="false"/>
+    <div v-if="!loading">
+      <modal name="add-expense">
+        <AddExpense
+          :adaptive="true"
+          @expense="addExpense"
+          @before-close="modalClosed"
+        ></AddExpense>
+      </modal>
+      <v-dialog :click-to-close="false"/>
 
-    <!-- <input type="range" v-model.number="categories[0].spentToday" min="0" max="500000"> -->
+      <!-- <input type="range" v-model.number="categories[0].spentToday" min="0" max="500000"> -->
 
-    <swiper ref="car" :options="swiperOption">
-      <swiper-slide v-for="cat in categories" :key="cat.name">
-        <CategoryView
-          class="category-view"
-          :need-today="cat.needToday"
-          :name="cat.name"
-          :total-for-period="cat.totalForPeriod"
-          :spent-not-today="cat.spentNotToday"
-          :spent-today="cat.spentToday"
-        ></CategoryView>
-      </swiper-slide>
-      <div class="swiper-pagination" slot="pagination"></div>
-    </swiper>
-    <a href="#" :class="['btn', 'hvr-fade', modalOpen ? 'hvr-opened' : '' ]" @click="openModal">✚</a>
+      <swiper ref="car" :options="swiperOption">
+        <swiper-slide v-for="cat in categories" :key="cat.name">
+          <CategoryView
+            class="category-view"
+            :need-today="cat.needToday"
+            :name="cat.name"
+            :total-for-period="cat.totalForPeriod"
+            :spent-not-today="cat.spentNotToday"
+            :spent-today="cat.spentToday"
+          ></CategoryView>
+        </swiper-slide>
+        <div class="swiper-pagination" slot="pagination"></div>
+      </swiper>
+      <a href="#" :class="['btn', 'hvr-fade', modalOpen ? 'hvr-opened' : '' ]" @click="openModal">✚</a>
+    </div>
+    <div v-else>
+      🔲
+    </div>
   </div>
 </template>
 
@@ -31,7 +42,8 @@ import AddExpense from './AddExpense.vue'
 
 export default {
   components: {
-    CategoryView
+    CategoryView,
+    AddExpense
   },
   name: 'Main',
   data () {
@@ -43,12 +55,10 @@ export default {
         }
       },
       ynab: {
-        clientId: '3f3d6f11dd6226add984b78b64e6b9d8d81a6c363e5d39c8f630b687fc0e29c8',
-        redirectUri: 'https://miniynab.luk.moe',
         token: null
       },
       api: null,
-      loading: false,
+      loading: true,
       error: null,
       budgetId: 'df538690-8e9c-4103-b2cb-8d40ebe2e822',
       categories: [
@@ -70,25 +80,16 @@ export default {
   },
   mounted () {
     disableBodyScroll(this.$refs.car)
+    // this.resetToken()
     this.ynab.token = this.findYNABToken()
-    if (!this.ynab.token) {
-      this.$modal.show('dialog', {
-        title: 'Privacy Policy',
-        text:
-          'This website does not store any information from you or your YNAB account. ' +
-          'All data retrieved from the YNAB API is stored only in your browser and ' +
-          'is never transmitted to any other location or third-party.',
-        buttons: [{
-          title: 'Got it, take me to login',
-          handler: () => {
-            this.authorizeWithYNAB()
-          }
-        }]
-      })
-    } else {
+    if (this.ynab.token) {
       // eslint-disable-next-line
       this.api = new ynab.api(this.ynab.token)
-
+      this.updateYNAB()
+    }
+  },
+  methods: {
+    updateYNAB () {
       this.apiReq(this.api.budgets.getBudgetById(this.budgetId), (res) => {
         console.log(res.data)
         let categories = {}
@@ -135,7 +136,6 @@ export default {
         let checkAddTranDate = (date, catId, amount) => {
           let tranDate = new Date(date)
           tranDate.setHours(0, 0, 0, 0)
-          console.log(today, tranDate)
           if (tranDate.getTime() === today.getTime()) {
             console.log('today')
             categories[catId].spentToday -= amount
@@ -166,12 +166,33 @@ export default {
         console.log(tmp)
         this.categories = tmp
       })
-    }
-  },
-  methods: {
+    },
+    addExpense (data) {
+      let curCat = this.categories[this.$refs.car.swiper.activeIndex]
+      let tran = {
+        transaction: {
+          account_id: 'eb924ac3-bd0f-4e25-be15-59e77cca0915',
+          date: '2019-02-03',
+          amount: -data.amount,
+          payee_name: 'Расходы из MiniYNAB',
+          category_id: curCat.id,
+          memo: data.comment,
+          approved: true
+        }
+      }
+      this.apiReq(this.api.transactions.createTransaction(this.budgetId, tran), (res) => {
+        console.log(res.data)
+        this.updateYNAB()
+      })
+    },
     apiReq (promise, cb) {
+      this.loading = true
       promise.then(cb).catch((err) => {
         console.log(err)
+        if (err.error.id === '401') {
+          this.resetToken()
+          location.reload()
+        }
         this.$modal.show('dialog', {
           title: 'Не пугайся, случилась ошибочка',
           text:
@@ -190,46 +211,22 @@ export default {
       })
     },
     openModal () {
-      this.$modal.show(AddExpense, null, {
-        name: 'add-expense',
-        adaptive: true
-      }, {
-        'before-close': this.modalClosed
-      })
+      this.$modal.show('add-expense')
       this.modalOpen = true
     },
     modalClosed () {
       this.modalOpen = false
     },
-    // This builds a URI to get an access token from YNAB
-    // https://api.youneedabudget.com/#outh-applications
-    authorizeWithYNAB () {
-      const uri = `https://app.youneedabudget.com/oauth/authorize?client_id=${this.ynab.clientId}&redirect_uri=${this.ynab.redirectUri}&response_type=token`
-      location.replace(uri)
-    },
-
-    // Method to find a YNAB token
-    // First it looks in the location.hash and then sessionStorage
     findYNABToken () {
-      let token = null
-      const search = window.location.hash.substring(1).replace(/&/g, '","').replace(/=/g, '":"')
-      if (search && search !== '') {
-        // Try to get access_token from the hash returned by OAuth
-        const params = JSON.parse('{"' + search + '"}', function (key, value) {
-          return key === '' ? value : decodeURIComponent(value)
-        })
-        token = params.access_token
-        sessionStorage.setItem('ynab_access_token', token)
-        window.location.hash = ''
-      } else {
-        // Otherwise try sessionStorage
-        token = sessionStorage.getItem('ynab_access_token')
+      let token = localStorage.getItem('ynab_access_token')
+      if (!token || token === 'null') {
+        token = prompt('Token')
+        localStorage.setItem('ynab_access_token', token)
       }
       return token
     },
-    // Clear the token and start authorization over
     resetToken () {
-      sessionStorage.removeItem('ynab_access_token')
+      localStorage.removeItem('ynab_access_token')
       this.ynab.token = null
       this.error = null
     }

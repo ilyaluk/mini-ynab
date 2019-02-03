@@ -7,7 +7,6 @@ import VueAwesomeSwiper from 'vue-awesome-swiper'
 import 'swiper/dist/css/swiper.css'
 
 Vue.use(VModal, {
-  dynamic: true,
   dialog: true
 })
 Vue.use(VueAwesomeSwiper)
