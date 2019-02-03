@@ -1,11 +1,13 @@
 <template>
   <div>
     <div v-if="!loading">
-      <modal name="add-expense">
+      <modal
+        name="add-expense"
+        :adaptive="true"
+        @before-close="modalClosed"
+      >
         <AddExpense
-          :adaptive="true"
           @expense="addExpense"
-          @before-close="modalClosed"
         ></AddExpense>
       </modal>
       <v-dialog :click-to-close="false"/>
