@@ -12,8 +12,6 @@
       </modal>
       <v-dialog :click-to-close="false"/>
 
-      <!-- <input type="range" v-model.number="categories[0].spentToday" min="0" max="500000"> -->
-
       <swiper ref="car" :options="swiperOption">
         <swiper-slide v-for="cat in categories" :key="cat.name">
           <CategoryView
@@ -81,7 +79,7 @@ export default {
     }
   },
   mounted () {
-    disableBodyScroll(this.$refs.car)
+    disableBodyScroll(this.$el)
     // this.resetToken()
     this.ynab.token = this.findYNABToken()
     if (this.ynab.token) {
