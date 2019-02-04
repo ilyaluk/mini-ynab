@@ -243,7 +243,7 @@ export default {
   margin-top: 10px;
   padding: .5em 2em;
   cursor: pointer;
-  background: #E3B23C;
+  background: #FC9F5B;
   color: #666;
   font-size: 30px;
   text-decoration: none;
@@ -267,7 +267,7 @@ export default {
 }
 
 .hvr-fade:hover, .hvr-fade:focus, .hvr-fade:active, .hvr-opened {
-  background-color: #0CCE6B;
+  background-color: #ADE25D;
   color: white;
 }
 </style>

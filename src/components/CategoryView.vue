@@ -31,7 +31,7 @@
         :animation="false"
         ref="circleToday">
           <b>На сегодня</b>
-          <h1 :style="leftForToday <= 0 ? { color: '#E3B23C' } : {}">{{ formatMoney(leftForToday) }}</h1>
+          <h1 :style="leftForToday <= 0 ? { color: '#FC9F5B' } : {}">{{ formatMoney(leftForToday) }}</h1>
           <p>До получки {{ untilNextPay() }} {{ formatDays(untilNextPay()) }}</p>
       </vue-circle>
       <p v-else class="bigp">
