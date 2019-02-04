@@ -189,7 +189,7 @@ export default {
       this.loading = true
       promise.then(cb).catch((err) => {
         console.log(err)
-        if (err.error.id === '401') {
+        if (err.error && err.error.id === '401') {
           this.resetToken()
           location.reload()
         }
@@ -197,7 +197,7 @@ export default {
           title: 'Не пугайся, случилась ошибочка',
           text:
             'YNAB сказал:<pre style="white-space: pre-wrap;">' +
-              err.error.detail +
+              (err.error ? err.error.detail : err) +
               '</pre>🤔🤷‍♂️<br>Отправь мне скриншот, пожалуйста',
           buttons: [{
             title: 'Хорошо, не буду паниковать',

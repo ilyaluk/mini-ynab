@@ -15,6 +15,7 @@
       :thickness="20"
       :show-percent="false"
       :animation="false"
+      :class="needToday ? 'circle-opacity' : ''"
       ref="circlePeriod">
       <vue-circle
         v-if="needToday"
@@ -139,6 +140,9 @@ export default {
       return Math.max(0, 100 - (this.spentPeriod / this.totalForPeriod * 100))
     },
     percToday () {
+      if (this.maxForToday <= 0) {
+        return 0
+      }
       return Math.max(0, 100 - (this.spentToday / this.maxForToday * 100))
     },
     leftForPeriod () {
@@ -148,6 +152,7 @@ export default {
       return this.totalForPeriod / (this.fromPrevPay() + this.untilNextPay())
     },
     maxForToday () {
+      // avg + all not spent in prev days
       return this.avgForDay + (this.avgForDay * this.fromPrevPay() - this.spentNotToday)
     },
     leftForToday () {
@@ -199,5 +204,11 @@ p {
 }
 .bigp {
   font-size: 20px;
+}
+</style>
+
+<style>
+div.circle-opacity > canvas {
+  opacity: 0.5;
 }
 </style>

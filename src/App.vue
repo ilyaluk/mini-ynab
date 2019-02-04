@@ -22,7 +22,7 @@ body {
   width: 100%;
   min-height: 100vh;
   background: linear-gradient(315deg, #ADE25D, #0CCE6B);
-  background-color: #05d6dc;
+  background-color: #0CCE6B;
   cursor: default;
   box-sizing: border-box;
 }
