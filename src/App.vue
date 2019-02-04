@@ -21,7 +21,7 @@ body {
   padding: 20px 10px;
   width: 100%;
   min-height: 100vh;
-  background: linear-gradient(315deg, #fc00aa, #00dbde);
+  background: linear-gradient(315deg, #ADE25D, #0CCE6B);
   background-color: #05d6dc;
   cursor: default;
   box-sizing: border-box;
@@ -32,7 +32,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: #363537;
 
   background: #fffff7;
   padding: 20px 10px;

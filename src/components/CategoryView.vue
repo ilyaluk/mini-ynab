@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2>{{ name }}</h2>
-    <p :style="leftForPeriod > 0 ? { color: 'black' } : { color : 'red', fontWeight: 'bold' }" class="mb-40">
+    <p :style="leftForPeriod <= 0 ? { color : '#F75C03', fontWeight: 'bold' } : {}" class="mb-40">
       Осталось {{ formatMoney(leftForPeriod) }} {{ needToday ? '/ ' + formatMoney(avgForDay) : '' }}
     </p>
     <vue-circle
@@ -30,7 +30,7 @@
         :animation="false"
         ref="circleToday">
           <b>На сегодня</b>
-          <h1 :style="{ color: leftForToday > 0 ? 'black' : '#FFA500' }">{{ formatMoney(leftForToday) }}</h1>
+          <h1 :style="leftForToday <= 0 ? { color: '#E3B23C' } : {}">{{ formatMoney(leftForToday) }}</h1>
           <p>До получки {{ untilNextPay() }} {{ formatDays(untilNextPay()) }}</p>
       </vue-circle>
       <p v-else class="bigp">
