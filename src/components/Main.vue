@@ -169,10 +169,20 @@ export default {
     },
     addExpense (data) {
       let curCat = this.categories[this.$refs.car.swiper.activeIndex]
+      let today = new Date()
+      let month = '' + (today.getMonth() + 1)
+      let day = '' + today.getDate()
+      let year = today.getFullYear()
+
+      if (month.length < 2) month = '0' + month
+      if (day.length < 2) day = '0' + day
+
+      let todayStr = [year, month, day].join('-')
+
       let tran = {
         transaction: {
           account_id: 'eb924ac3-bd0f-4e25-be15-59e77cca0915',
-          date: '2019-02-03',
+          date: todayStr,
           amount: -data.amount,
           payee_name: 'Расходы из MiniYNAB',
           category_id: curCat.id,
