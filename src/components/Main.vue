@@ -7,16 +7,16 @@
         @before-close="modalClosed"
       >
         <AddExpense
-          @expense="addExpense"
+          @expense="addExpenseHandler"
         ></AddExpense>
       </modal>
       <v-dialog :click-to-close="false"/>
 
       <swiper ref="car" :options="swiperOption">
-        <swiper-slide v-for="cat in categories" :key="cat.name">
+        <swiper-slide v-for="cat in categoryList" :key="cat.id">
           <CategoryView
             class="category-view"
-            :need-today="cat.needToday"
+            :need-today="cat.needAllowance"
             :name="cat.name"
             :total-for-period="cat.totalForPeriod"
             :spent-not-today="cat.spentNotToday"
@@ -61,21 +61,7 @@ export default {
       loading: true,
       error: null,
       budgetId: 'df538690-8e9c-4103-b2cb-8d40ebe2e822',
-      categories: [
-        // {
-        //   needToday: true,
-        //   name: '🧝‍♀️ Карманные',
-        //   totalForPeriod: 200000,
-        //   spentNotToday: 45000,
-        //   spentToday: 10000
-        // },
-        // {
-        //   name: 'Продукты',
-        //   totalForPeriod: 800000,
-        //   spentNotToday: 610620,
-        //   spentToday: 0
-        // }
-      ]
+      categoryList: []
     }
   },
   mounted () {
@@ -90,40 +76,66 @@ export default {
   },
   methods: {
     updateYNAB () {
-      this.apiReq(this.api.budgets.getBudgetById(this.budgetId), (res) => {
-        console.log(res.data)
-        let categories = {}
-        for (let cat of res.data.budget.categories) {
+      let parseOptions = (note) => {
+        let res = null
+        if (!note) return res
+        let options = note.replace(/ /g, '').split(',')
+        if (options[0] === 'mini-ynab') {
+          res = {}
+          for (let part of options) {
+            let [arg, val] = part.split(':')
+            res[arg] = val
+          }
+        }
+        return res
+      }
+      let parseCaterories = (rawCategories) => {
+        let res = {}
+        for (let cat of rawCategories) {
           if (cat.note) {
-            let text = cat.note.replace(/ /g, '').split(',')
-            console.log(text)
-            if (text[0] === 'mini-ynab') {
+            let options = parseOptions(cat.note)
+            if (options) {
               let category = {
-                order: 1e9,
                 id: cat.id,
                 name: cat.name,
+                order: +options.order || 1e9,
                 totalForPeriod: cat.balance - cat.activity,
                 spentNotToday: -cat.activity,
-                spentToday: 0
+                spentToday: 0,
+                needAllowance: false
               }
-              for (let part of text) {
-                let [arg, val] = part.split(':')
-                if (arg === 'order') {
-                  category.order = +val
-                } else if (arg === 'budget') {
-                  category.totalForPeriod = (+val) * 1000
-                  category.spentNotToday = 0
-                  category.needToday = true
-                }
+              if (options.budget) {
+                category.totalForPeriod = (+options.budget) * 1000
+                category.spentNotToday = 0
+                category.needAllowance = true
               }
-              categories[cat.id] = category
+              res[cat.id] = category
             }
           }
         }
+        return res
+      }
+      let getTransactionsForAllowance = (budget, categories) => {
+        let transactionDates = {}
+        let res = []
+        let needAllowance = (catId) => categories[catId] && categories[catId].needAllowance
 
-        let today = new Date()
-        today.setHours(0, 0, 0, 0)
-        var prevPay = new Date(today.getTime())
+        for (let tran of budget.transactions) {
+          transactionDates[tran.id] = tran.date // save dates for subtransactions
+          if (needAllowance(tran.category_id)) {
+            res.push([tran.date, tran.category_id, tran.amount])
+          }
+        }
+        for (let subtran of budget.subtransactions) {
+          if (needAllowance(subtran.category_id)) {
+            let date = transactionDates[subtran.transaction_id]
+            res.push([date, subtran.category_id, subtran.amount])
+          }
+        }
+        return res
+      }
+      let getPrevPay = (today) => {
+        let prevPay = new Date(today.getTime())
 
         if (today.getDate() > 5 && today.getDate() <= 20) {
           prevPay.setDate(5)
@@ -133,67 +145,59 @@ export default {
             prevPay.setMonth(today.getMonth() - 1)
           }
         }
+        return prevPay
+      }
+      let processTransactions = (transactions, categories) => {
+        let today = new Date()
+        today.setHours(0, 0, 0, 0)
+        let prevPay = getPrevPay(today)
 
-        let checkAddTranDate = (date, catId, amount) => {
-          let tranDate = new Date(date)
+        for (let [date, catId, amount] of transactions) {
+          let tranDate = ynab.utils.convertFromISODateString(date)
           let cat = categories[catId]
-          tranDate.setHours(0, 0, 0, 0)
+
           if (tranDate.getTime() === today.getTime()) {
-            console.log('today')
             cat.spentToday -= amount
-          } else if (cat.needToday && tranDate > prevPay) {
-            console.log('fromPay')
+          } else if (tranDate > prevPay) {
             cat.spentNotToday -= amount
           }
         }
+      }
+      let sortCategories = (categories) => {
+        let cats = Object.values(categories)
+        cats.sort((a, b) => a.order - b.order)
+        console.log('sorted cats', cats)
+        return cats
+      }
 
-        let transactionDates = {}
-        for (let tran of res.data.budget.transactions) {
-          transactionDates[tran.id] = tran.date
-          if (categories[tran.category_id]) {
-            console.log(tran)
-            checkAddTranDate(tran.date, tran.category_id, tran.amount)
-          }
-        }
-        for (let subtran of res.data.budget.subtransactions) {
-          if (categories[subtran.category_id]) {
-            console.log(subtran)
-            let date = transactionDates[subtran.transaction_id]
-            checkAddTranDate(date, subtran.category_id, subtran.amount)
-          }
-        }
+      this.apiReq(this.api.budgets.getBudgetById(this.budgetId), (res) => {
+        console.log('api data', res.data)
 
-        let tmp = Object.values(categories)
-        tmp.sort((a, b) => a.order - b.order)
-        console.log(tmp)
-        this.categories = tmp
+        let categories = parseCaterories(res.data.budget.categories)
+        let transactions = getTransactionsForAllowance(res.data.budget, categories)
+        processTransactions(transactions, categories)
+        this.categoryList = sortCategories(categories)
       })
     },
-    addExpense (data) {
+    addExpenseHandler (data) {
+      this.addExpense(data.amount, data.comment)
+    },
+    addExpense (amount, comment) {
       let curCat = this.categories[this.$refs.car.swiper.activeIndex]
-      let today = new Date()
-      let month = '' + (today.getMonth() + 1)
-      let day = '' + today.getDate()
-      let year = today.getFullYear()
-
-      if (month.length < 2) month = '0' + month
-      if (day.length < 2) day = '0' + day
-
-      let todayStr = [year, month, day].join('-')
 
       let tran = {
         transaction: {
           account_id: 'eb924ac3-bd0f-4e25-be15-59e77cca0915',
-          date: todayStr,
-          amount: -data.amount,
+          date: ynab.utils.getCurrentDateInISOFormat(),
+          amount: -amount,
           payee_name: 'Расходы из MiniYNAB',
           category_id: curCat.id,
-          memo: data.comment,
+          memo: comment,
           approved: true
         }
       }
       this.apiReq(this.api.transactions.createTransaction(this.budgetId, tran), (res) => {
-        console.log(res.data)
+        console.log('created tran resp', res.data)
         this.updateYNAB()
       })
     },

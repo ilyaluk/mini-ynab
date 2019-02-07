@@ -8,7 +8,7 @@
       :progress="0"
       :size="300"
       line-cap="round"
-      :fill="fillPeriod"
+      :fill="getFill(percPeriod)"
       empty-fill="rgba(0, 0, 0, .05)"
       :start-angle="-Math.PI / 2"
       insert-mode="append"
@@ -22,7 +22,7 @@
         :progress="0"
         :size="240"
         line-cap="round"
-        :fill="fillToday"
+        :fill="getFill(percToday)"
         empty-fill="rgba(0, 0, 0, .05)"
         :start-angle="-Math.PI / 2"
         insert-mode="append"
@@ -45,6 +45,7 @@
 import VueCircle from 'vue2-circle-progress'
 import { utils } from 'ynab'
 
+// https://gka.github.io/palettes/#colors=SeaGreen,LimeGreen,YellowGreen,orange,red|steps=34|bez=1|coL=0
 let colorRange = [
   '#2e8b57', '#2f8e56', '#309055', '#319354', '#329553', '#339752', '#349a51', '#359c50', '#369e4f', '#38a04e', '#39a24d',
   '#3ba54c', '#3ca74b', '#3ea94a', '#3fab49', '#41ac48', '#43ae47', '#45b047', '#47b246', '#49b445', '#4bb544', '#4db743',
@@ -73,12 +74,12 @@ export default {
   methods: {
     updatePeriod (val) {
       this.$refs.circlePeriod.updateProgress(+val)
-      this.$refs.circlePeriod.updateFill(this.fillPeriod)
+      this.$refs.circlePeriod.updateFill(this.getFill(+val))
     },
     updateToday (val) {
       if (this.needToday) {
         this.$refs.circleToday.updateProgress(+val)
-        this.$refs.circleToday.updateFill(this.fillToday)
+        this.$refs.circleToday.updateFill(this.getFill(+val))
       }
     },
     untilNextPay () {
@@ -128,6 +129,11 @@ export default {
       num = colorRange.length - (~~num) - 1
       return Math.max(0, Math.min(colorRange.length - 1, num))
     },
+    getFill (perc) {
+      return {
+        color: colorRange[this.convertToIndex(perc)]
+      }
+    },
     formatMoney (val) {
       return utils.convertMilliUnitsToCurrencyAmount(val).toFixed(2) + '₽'
     }
@@ -157,16 +163,6 @@ export default {
     },
     leftForToday () {
       return this.maxForToday - this.spentToday
-    },
-    fillPeriod () {
-      return {
-        color: colorRange[this.convertToIndex(this.percPeriod)]
-      }
-    },
-    fillToday () {
-      return {
-        color: colorRange[this.convertToIndex(this.percToday)]
-      }
     }
   },
   mounted () {
