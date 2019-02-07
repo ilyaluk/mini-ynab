@@ -102,8 +102,8 @@ export default {
                 order: 1e9,
                 id: cat.id,
                 name: cat.name,
-                totalForPeriod: cat.budgeted,
-                spentNotToday: 0,
+                totalForPeriod: cat.balance - cat.activity,
+                spentNotToday: -cat.activity,
                 spentToday: 0
               }
               for (let part of text) {
@@ -112,6 +112,7 @@ export default {
                   category.order = +val
                 } else if (arg === 'budget') {
                   category.totalForPeriod = (+val) * 1000
+                  category.spentNotToday = 0
                   category.needToday = true
                 }
               }
@@ -135,13 +136,14 @@ export default {
 
         let checkAddTranDate = (date, catId, amount) => {
           let tranDate = new Date(date)
+          let cat = categories[catId]
           tranDate.setHours(0, 0, 0, 0)
           if (tranDate.getTime() === today.getTime()) {
             console.log('today')
-            categories[catId].spentToday -= amount
-          } else if (tranDate > prevPay) {
+            cat.spentToday -= amount
+          } else if (cat.needToday && tranDate > prevPay) {
             console.log('fromPay')
-            categories[catId].spentNotToday -= amount
+            cat.spentNotToday -= amount
           }
         }
 
