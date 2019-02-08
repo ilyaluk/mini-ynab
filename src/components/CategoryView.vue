@@ -8,7 +8,6 @@
       :progress="0"
       :size="300"
       line-cap="round"
-      :fill="getFill(percPeriod)"
       empty-fill="rgba(0, 0, 0, .05)"
       :start-angle="-Math.PI / 2"
       insert-mode="append"
@@ -22,7 +21,6 @@
         :progress="0"
         :size="240"
         line-cap="round"
-        :fill="getFill(percToday)"
         empty-fill="rgba(0, 0, 0, .05)"
         :start-angle="-Math.PI / 2"
         insert-mode="append"
@@ -72,14 +70,13 @@ export default {
     spentToday: Number
   },
   methods: {
-    updatePeriod (val) {
-      this.$refs.circlePeriod.updateProgress(+val)
-      this.$refs.circlePeriod.updateFill(this.getFill(+val))
-    },
-    updateToday (val) {
+    updateAll () {
+      console.log('updateing', this.name, this.spentToday, this.percToday, this.maxForToday)
+      this.$refs.circlePeriod.updateFill(this.getFill(+this.percPeriod))
+      this.$refs.circlePeriod.updateProgress(+this.percPeriod)
       if (this.needToday) {
-        this.$refs.circleToday.updateProgress(+val)
-        this.$refs.circleToday.updateFill(this.getFill(+val))
+        this.$refs.circleToday.updateFill(this.getFill(+this.percToday))
+        this.$refs.circleToday.updateProgress(+this.percToday)
       }
     },
     untilNextPay () {
@@ -166,15 +163,14 @@ export default {
     }
   },
   mounted () {
-    this.updatePeriod(this.percPeriod)
-    this.updateToday(this.percToday)
+    this.updateAll()
   },
   watch: {
-    percPeriod: function (val, old) {
-      this.updatePeriod(val)
+    spentNotToday () {
+      this.updateAll()
     },
-    percToday: function (val, old) {
-      this.updateToday(val)
+    spentToday () {
+      this.updateAll()
     }
   }
 }

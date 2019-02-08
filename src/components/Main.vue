@@ -132,6 +132,7 @@ export default {
             res.push([date, subtran.category_id, subtran.amount])
           }
         }
+        console.log('trans for allow', res)
         return res
       }
       let getPrevPay = (today) => {
@@ -154,8 +155,8 @@ export default {
 
         for (let [date, catId, amount] of transactions) {
           let tranDate = ynab.utils.convertFromISODateString(date)
+          tranDate.setHours(0, 0, 0, 0)
           let cat = categories[catId]
-
           if (tranDate.getTime() === today.getTime()) {
             cat.spentToday -= amount
           } else if (tranDate > prevPay) {
@@ -183,7 +184,7 @@ export default {
       this.addExpense(data.amount, data.comment)
     },
     addExpense (amount, comment) {
-      let curCat = this.categories[this.$refs.car.swiper.activeIndex]
+      let curCat = this.categoryList[this.$refs.car.swiper.activeIndex]
 
       let tran = {
         transaction: {
