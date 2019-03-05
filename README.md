@@ -1,29 +1,21 @@
-# mini-ynab
+# MiniYNAB
 
-## Project setup
-```
+> Allowance companion for YNAB
+
+[Demo](https://miniynab.luk.moe)
+
+Due to limitations of iOS PWA support this app uses personal YNAB development token, you can obtain it [here](https://app.youneedabudget.com/settings/developer) (it's only saved in browser).
+
+```bash
+# Setup
 npm install
-```
 
-### Compiles and hot-reloads for development
-```
+# Compiles and hot-reloads for development
 npm run serve
-```
 
-### Compiles and minifies for production
-```
+# Compiles and minifies for production
 npm run build
-```
 
-### Run your tests
-```
-npm run test
-```
-
-### Lints and fixes files
-```
+# Lints and fixes files
 npm run lint
 ```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
