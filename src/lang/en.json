@@ -7,5 +7,10 @@
     "two": "days",
     "many": "days"
   },
-  "save": "Save"
+  "save": "Save",
+  "error": {
+    "text":"YNAB error",
+    "info": "",
+    "ok": "OK, got it"
+  }
 }

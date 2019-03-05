@@ -211,13 +211,13 @@ export default {
           location.reload()
         }
         this.$modal.show('dialog', {
-          title: 'Не пугайся, случилась ошибочка',
+          title: this.$t('error.text'),
           text:
-            'YNAB сказал:<pre style="white-space: pre-wrap;">' +
+            '<pre style="white-space: pre-wrap;">' +
               (err.error ? err.error.detail : err) +
-              '</pre>🤔🤷‍♂️<br>Отправь мне скриншот, пожалуйста',
+              '</pre>🤔🤷‍♂️<br>' + this.$t('error.info'),
           buttons: [{
-            title: 'Хорошо, не буду паниковать',
+            title: this.$t('error.ok'),
             handler: () => {
               this.$modal.hide('dialog')
             }
