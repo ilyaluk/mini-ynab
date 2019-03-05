@@ -2,6 +2,8 @@
 
 > Allowance companion for YNAB
 
+<img src="https://i.imgur.com/ZwWRWe5.jpg" width="30%" />
+
 [Demo](https://miniynab.luk.moe)
 
 Due to limitations of iOS PWA support this app uses personal YNAB development token, you can obtain it [here](https://app.youneedabudget.com/settings/developer) (it's only saved in browser).
