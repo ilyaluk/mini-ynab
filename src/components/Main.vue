@@ -104,8 +104,7 @@ export default {
                 spentToday: 0,
                 needAllowance: false
               }
-              if (options.budget) {
-                category.totalForPeriod = (+options.budget) * 1000
+              if (options.allowance) {
                 category.spentNotToday = 0
                 category.needAllowance = true
               }
@@ -159,8 +158,10 @@ export default {
           let cat = categories[catId]
           if (tranDate.getTime() === today.getTime()) {
             cat.spentToday -= amount
+            cat.totalForPeriod -= amount
           } else if (tranDate > prevPay) {
             cat.spentNotToday -= amount
+            cat.totalForPeriod -= amount
           }
         }
       }
