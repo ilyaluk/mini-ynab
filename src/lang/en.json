@@ -1,0 +1,11 @@
+{
+  "left": "Left",
+  "for_today": "For today",
+  "till_paycheck": "Till paycheck:",
+  "days": {
+    "one": "day",
+    "two": "days",
+    "many": "days"
+  },
+  "save": "Save"
+}

@@ -2,7 +2,7 @@
   <div>
     <h2>{{ name }}</h2>
     <p :style="leftForPeriod <= 0 ? { color : '#F75C03', fontWeight: 'bold' } : {}" class="mb-40">
-      Осталось {{ formatMoney(leftForPeriod) }} {{ needToday ? '/ ' + formatMoney(avgForDay) : '' }}
+      {{ $t('left') }} {{ formatMoney(leftForPeriod) }} {{ needToday ? '/ ' + formatMoney(avgForDay) : '' }}
     </p>
     <vue-circle
       :progress="0"
@@ -28,12 +28,12 @@
         :show-percent="false"
         :animation="false"
         ref="circleToday">
-          <b>На сегодня</b>
+          <b>{{ $t('for_today') }}</b>
           <h1 :style="leftForToday <= 0 ? { color: '#FC9F5B' } : {}">{{ formatMoney(leftForToday) }}</h1>
-          <p>До получки {{ untilNextPay() }} {{ formatDays(untilNextPay()) }}</p>
+          <p>{{ $t('till_paycheck') }} {{ untilNextPay() }} {{ formatDays(untilNextPay()) }}</p>
       </vue-circle>
       <p v-else class="bigp">
-        До получки {{ untilNextPay() }} {{ formatDays(untilNextPay()) }}
+        {{ $t('till_paycheck') }} {{ untilNextPay() }} {{ formatDays(untilNextPay()) }}
       </p>
     </vue-circle>
   </div>
@@ -112,15 +112,19 @@ export default {
       return daysFrom - 1
     },
     formatDays (days) {
-      let one = 'день'
-      let two = 'дня'
-      let few = 'дней'
+      let one = this.$t('days.one')
+      let two = this.$t('days.two')
+      let few = this.$t('days.few')
 
-      if (days > 4 && days < 20) return few
-      if (days % 10 > 4) return few
-      if (days % 10 > 1) return two
-      if (days % 10 === 1) return one
-      if (days % 10 === 0) return few
+      if (this.$i18n.locale == 'ru') {
+        if (days > 4 && days < 20) return few
+        if (days % 10 > 4) return few
+        if (days % 10 > 1) return two
+        if (days % 10 === 1) return one
+        if (days % 10 === 0) return few
+      } else {
+        return days == 1 ? one : few
+      }
     },
     convertToIndex (num) {
       num = colorRange.length - (~~num) - 1
